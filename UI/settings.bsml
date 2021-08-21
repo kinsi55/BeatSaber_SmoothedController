@@ -1,0 +1,20 @@
+﻿<settings-container>
+	<horizontal horizontal-fit="PreferredSize">
+		<checkbox-setting apply-on-change="true" value="Enabled" text="Enable smoothing"/>
+	</horizontal>
+	<horizontal horizontal-fit="PreferredSize">
+		<slider-setting apply-on-change="true" value="SmallMovementThresholdAngle" text="Small angle Threshold"
+						hover-hint="Angle difference to consider a 'small' movement. The less shaky your hands are the lower you probably want to put this. This is probably the primary value you want to tweak"
+						min="4" max="15" increment="0.5"/>
+	</horizontal>
+	<horizontal horizontal-fit="PreferredSize">
+		<slider-setting apply-on-change="true" value="PositionSmoothing" text="Position Smoothing"
+						hover-hint="How much to smooth position changes by"
+						min="0" max="20" increment="0.5"/>
+	</horizontal>
+	<horizontal horizontal-fit="PreferredSize">
+		<slider-setting apply-on-change="true" value="RotationSmoothing" text="Rotation Smoothing"
+						hover-hint="How much to smooth rotation changes by"
+						min="0" max="20" increment="0.5"/>
+	</horizontal>
+</settings-container>
