@@ -12,13 +12,12 @@ namespace SmoothedController.HarmonyPatches {
 		public float angleVelocitySnap = 1f;
 	}
 
-	[HarmonyPatch(typeof(VRController), "Update")]
 	public static class Smoother {
 		public static bool enabled = true;
 
 		static Dictionary<XRNode, wrapper> idk = new Dictionary<XRNode, wrapper>();
 
-		static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions) {
+		internal static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions) {
 			if(!ILUtil.CheckIL(instructions, new Dictionary<int, OpCode>() {
 				{50, OpCodes.Ldarg_0},
 				{51, OpCodes.Ldfld},
@@ -63,7 +62,7 @@ namespace SmoothedController.HarmonyPatches {
 			}
 		}
 
-		static void Prefix(VRController __instance, VRControllerTransformOffset ____transformOffset) {
+		internal static void Prefix(VRController __instance) {
 			// Check if the VRController's gameObject name starts with "C" (Controller) so that sabers (LeftHand / RightHand) are not smoothed lmao
 			if(__instance.gameObject.name[0] != 'C') {
 				instance = null;
@@ -72,5 +71,7 @@ namespace SmoothedController.HarmonyPatches {
 
 			instance = __instance;
 		}
+
+		internal static void Postfix() => YES();
 	}
 }

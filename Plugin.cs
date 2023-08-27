@@ -3,13 +3,8 @@ using HarmonyLib;
 using IPA;
 using IPA.Config;
 using IPA.Config.Stores;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using UnityEngine;
-using UnityEngine.SceneManagement;
+using IPA.Utilities;
+using SmoothedController.HarmonyPatches;
 using IPALogger = IPA.Logging.Logger;
 
 namespace SmoothedController {
@@ -30,13 +25,26 @@ namespace SmoothedController {
 		public void OnApplicationStart() {
 			BSMLSettings.instance.AddSettingsMenu("Smooth Controller", "SmoothedController.UI.settings.bsml", PluginConfig.Instance);
 
+			var original = AccessTools.Method(typeof(VRController), "Update");
 			harmony = new Harmony("Kinsi55.BeatSaber.SmoothedController");
-			harmony.PatchAll(Assembly.GetExecutingAssembly());
+			harmony.Patch(original, new HarmonyMethod(AccessTools.Method(typeof(Smoother), nameof(Smoother.Prefix))));
+			if(CompareGameVersions(UnityGame.GameVersion, new AlmostVersion("1.29.4")) >= 0) {
+				harmony.Patch(original, null, new HarmonyMethod(AccessTools.Method(typeof(Smoother), nameof(Smoother.Postfix))));
+			} else {
+				harmony.Patch(original, null, null, new HarmonyMethod(AccessTools.Method(typeof(Smoother), nameof(Smoother.Transpiler))));
+			}
 		}
 
 		[OnExit]
 		public void OnApplicationQuit() {
-			harmony.UnpatchAll(harmony.Id);
+			harmony.UnpatchSelf();
+		}
+
+		static int CompareGameVersions(AlmostVersion a, AlmostVersion b) {
+			string stringValue = a.StringValue;
+			return stringValue == null
+				? a.CompareTo(b)
+				: new AlmostVersion(stringValue.Substring(0, stringValue.IndexOf('_'))).CompareTo(b);
 		}
 	}
 }
