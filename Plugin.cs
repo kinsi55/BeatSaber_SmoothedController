@@ -36,7 +36,7 @@ namespace SmoothedController {
 
 		[OnExit]
 		public void OnApplicationQuit() {
-			harmony.UnpatchAll(harmony.Id);
+			harmony.UnpatchSelf();
 		}
 	}
 }

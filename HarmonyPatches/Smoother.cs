@@ -1,7 +1,10 @@
 ﻿using HarmonyLib;
+using IPA.Utilities;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.XR;
 
@@ -13,37 +16,46 @@ namespace SmoothedController.HarmonyPatches {
 	}
 
 	[HarmonyPatch(typeof(VRController), "Update")]
+	static class SaberSmoothFilter {
+		public static bool isSaber = true;
+
+		static void Prefix(VRController __instance) {
+			isSaber = __instance.gameObject.name[0] != 'C';
+		}
+	}
+
+	[HarmonyPatch]
 	public static class Smoother {
 		public static bool enabled = true;
 
-		static Dictionary<XRNode, wrapper> idk = new Dictionary<XRNode, wrapper>();
+		static Dictionary<XRNode, wrapper> idk 
+			= new Dictionary<XRNode, wrapper>();
 
-		static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions) {
-			if(!ILUtil.CheckIL(instructions, new Dictionary<int, OpCode>() {
-				{50, OpCodes.Ldarg_0},
-				{51, OpCodes.Ldfld},
-				{68, OpCodes.Ret}
-			})) return instructions;
+		static IEnumerable<MethodBase> TargetMethods() {
+			var oldUnity = AccessTools.Method("OpenVRHelper:GetNodePose");
 
-			ILUtil.InsertFn(50, ref instructions, AccessTools.Method(typeof(Smoother), nameof(YES)));
-
-			return instructions;
+			if(oldUnity != null) {
+				yield return oldUnity;
+			} else {
+				yield return AccessTools.Method("UnityXRHelper:GetNodePose");
+				yield return AccessTools.Method("OculusVRHelper:GetNodePose");
+			}
 		}
 
 		static float posSmoth = 20f - Mathf.Clamp(PluginConfig.Instance.PositionSmoothing, 0f, 20f);
 		static float rotSmoth = 20f - Mathf.Clamp(PluginConfig.Instance.RotationSmoothing, 0f, 20f);
 
-		static VRController instance;
-		static void YES() {
-			if(instance == null || !enabled || !PluginConfig.Instance.Enabled)
+		static void Postfix(IVRPlatformHelper __instance, XRNode nodeType, ref Vector3 pos, ref Quaternion rot) {
+			if(!enabled || !PluginConfig.Instance.Enabled || SaberSmoothFilter.isSaber)
 				return;
 
-			wrapper wrapperI = null;
+			if(nodeType != XRNode.LeftHand && nodeType != XRNode.RightHand)
+				return;
 
-			if(!idk.TryGetValue(instance.node, out wrapperI))
-				idk.Add(instance.node, wrapperI = new wrapper());
+			if(!idk.TryGetValue(nodeType, out var wrapperI))
+				idk.Add(nodeType, wrapperI = new wrapper());
 
-			var angDiff = Quaternion.Angle(wrapperI.smoothedRotation, instance.transform.localRotation);
+			var angDiff = Quaternion.Angle(wrapperI.smoothedRotation, rot);
 			wrapperI.angleVelocitySnap = Math.Min(wrapperI.angleVelocitySnap + angDiff, 90f);
 
 			var snapMulti = Mathf.Clamp(wrapperI.angleVelocitySnap / PluginConfig.Instance.SmallMovementThresholdAngle, 0.1f, 2.5f);
@@ -53,24 +65,14 @@ namespace SmoothedController.HarmonyPatches {
 			}
 
 			if(PluginConfig.Instance.PositionSmoothing > 0f) {
-				wrapperI.smoothedPosition = Vector3.Lerp(wrapperI.smoothedPosition, instance.transform.localPosition, posSmoth * Time.deltaTime * snapMulti);
-				instance.transform.localPosition = wrapperI.smoothedPosition;
+				wrapperI.smoothedPosition = Vector3.Lerp(wrapperI.smoothedPosition, pos, posSmoth * Time.deltaTime * snapMulti);
+				pos = wrapperI.smoothedPosition;
 			}
 
 			if(PluginConfig.Instance.RotationSmoothing > 0f) {
-				wrapperI.smoothedRotation = Quaternion.Lerp(wrapperI.smoothedRotation, instance.transform.localRotation, rotSmoth * Time.deltaTime * snapMulti);
-				instance.transform.localRotation = wrapperI.smoothedRotation;
+				wrapperI.smoothedRotation = Quaternion.Lerp(wrapperI.smoothedRotation, rot, rotSmoth * Time.deltaTime * snapMulti);
+				rot = wrapperI.smoothedRotation;
 			}
-		}
-
-		static void Prefix(VRController __instance, VRControllerTransformOffset ____transformOffset) {
-			// Check if the VRController's gameObject name starts with "C" (Controller) so that sabers (LeftHand / RightHand) are not smoothed lmao
-			if(__instance.gameObject.name[0] != 'C') {
-				instance = null;
-				return;
-			}
-
-			instance = __instance;
 		}
 	}
 }
