@@ -42,8 +42,8 @@ namespace SmoothedController.HarmonyPatches {
 			}
 		}
 
-		static float posSmoth = 20f - Mathf.Clamp(PluginConfig.Instance.PositionSmoothing, 0f, 20f);
-		static float rotSmoth = 20f - Mathf.Clamp(PluginConfig.Instance.RotationSmoothing, 0f, 20f);
+		static float posSmoth = 20.5f - Mathf.Clamp(PluginConfig.Instance.PositionSmoothing, 0f, 20f);
+		static float rotSmoth = 20.5f - Mathf.Clamp(PluginConfig.Instance.RotationSmoothing, 0f, 20f);
 
 		static void Postfix(IVRPlatformHelper __instance, XRNode nodeType, ref Vector3 pos, ref Quaternion rot) {
 			if(!enabled || !PluginConfig.Instance.Enabled || SaberSmoothFilter.isSaber)
