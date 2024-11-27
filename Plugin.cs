@@ -39,6 +39,8 @@ namespace SmoothedController {
 
 		private void reinitializeSettings() {
 			BSMLSettings.Instance.AddSettingsMenu("Smooth Controller", "SmoothedController.UI.settings.bsml", PluginConfig.Instance);
+			HarmonyPatches.Smoother.posSmoth = 20.5f - Mathf.Clamp(PluginConfig.Instance.PositionSmoothing, 0f, 20f);
+			HarmonyPatches.Smoother.rotSmoth = 20.5f - Mathf.Clamp(PluginConfig.Instance.RotationSmoothing, 0f, 20f);
 		}
 
 		[OnExit]

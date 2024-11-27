@@ -41,9 +41,8 @@ namespace SmoothedController.HarmonyPatches {
 				yield return AccessTools.Method("OculusVRHelper:GetNodePose");
 			}
 		}
-
-		static float posSmoth = 20.5f - Mathf.Clamp(PluginConfig.Instance.PositionSmoothing, 0f, 20f);
-		static float rotSmoth = 20.5f - Mathf.Clamp(PluginConfig.Instance.RotationSmoothing, 0f, 20f);
+		public static float posSmoth;
+		public static float rotSmoth;
 
 		static void Postfix(IVRPlatformHelper __instance, XRNode nodeType, ref Vector3 pos, ref Quaternion rot) {
 			if(!enabled || !PluginConfig.Instance.Enabled || SaberSmoothFilter.isSaber)
