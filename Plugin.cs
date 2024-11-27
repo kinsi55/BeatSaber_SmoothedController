@@ -30,10 +30,15 @@ namespace SmoothedController {
 		[OnStart]
 		async public void OnApplicationStart() {
 			await MainMenuAwaiter.WaitForMainMenuAsync();
-			BSMLSettings.Instance.AddSettingsMenu("Smooth Controller", "SmoothedController.UI.settings.bsml", PluginConfig.Instance);
+			MainMenuAwaiter.MainMenuInitializing += reinitializeSettings;
+			reinitializeSettings();
 
 			harmony = new Harmony("Kinsi55.BeatSaber.SmoothedController");
 			harmony.PatchAll(Assembly.GetExecutingAssembly());
+		}
+
+		private void reinitializeSettings() {
+			BSMLSettings.Instance.AddSettingsMenu("Smooth Controller", "SmoothedController.UI.settings.bsml", PluginConfig.Instance);
 		}
 
 		[OnExit]
