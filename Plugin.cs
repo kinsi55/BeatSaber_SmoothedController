@@ -8,6 +8,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using BeatSaberMarkupLanguage.Util;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using IPALogger = IPA.Logging.Logger;
@@ -27,8 +28,9 @@ namespace SmoothedController {
 		}
 
 		[OnStart]
-		public void OnApplicationStart() {
-			BSMLSettings.instance.AddSettingsMenu("Smooth Controller", "SmoothedController.UI.settings.bsml", PluginConfig.Instance);
+		async public void OnApplicationStart() {
+			await MainMenuAwaiter.WaitForMainMenuAsync();
+			BSMLSettings.Instance.AddSettingsMenu("Smooth Controller", "SmoothedController.UI.settings.bsml", PluginConfig.Instance);
 
 			harmony = new Harmony("Kinsi55.BeatSaber.SmoothedController");
 			harmony.PatchAll(Assembly.GetExecutingAssembly());
