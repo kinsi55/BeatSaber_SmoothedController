@@ -3,7 +3,7 @@
     "id": "SmoothedController",
     "name": "SmoothedController",
     "author": "Kinsi55",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "description": "Smoothes your Controller position while in menus to make it less shaky, making the UI easier to use, etc.",
     "gameVersion": "1.39.1",
     "dependsOn": {
