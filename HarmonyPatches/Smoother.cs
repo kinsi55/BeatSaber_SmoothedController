@@ -31,20 +31,11 @@ namespace SmoothedController.HarmonyPatches {
 		static Dictionary<XRNode, wrapper> idk 
 			= new Dictionary<XRNode, wrapper>();
 
-		static IEnumerable<MethodBase> TargetMethods() {
-			var oldUnity = AccessTools.Method("OpenVRHelper:GetNodePose");
+		static internal float posSmoth = 1f;
+		static internal float rotSmoth = 1f;
 
-			if(oldUnity != null) {
-				yield return oldUnity;
-			} else {
-				yield return AccessTools.Method("UnityXRHelper:GetNodePose");
-				yield return AccessTools.Method("OculusVRHelper:GetNodePose");
-			}
-		}
-
-		static float posSmoth = 20.5f - Mathf.Clamp(PluginConfig.Instance.PositionSmoothing, 0f, 20f);
-		static float rotSmoth = 20.5f - Mathf.Clamp(PluginConfig.Instance.RotationSmoothing, 0f, 20f);
-
+		[HarmonyPatch(typeof(UnityXRHelper), nameof(UnityXRHelper.GetNodePose))]
+		[HarmonyPatch(typeof(OculusVRHelper), nameof(OculusVRHelper.GetNodePose))]
 		static void Postfix(IVRPlatformHelper __instance, XRNode nodeType, ref Vector3 pos, ref Quaternion rot) {
 			if(!enabled || !PluginConfig.Instance.Enabled || SaberSmoothFilter.isSaber)
 				return;

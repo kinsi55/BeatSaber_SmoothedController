@@ -1,4 +1,5 @@
 ﻿using BeatSaberMarkupLanguage.Settings;
+using BeatSaberMarkupLanguage.Util;
 using HarmonyLib;
 using IPA;
 using IPA.Config;
@@ -28,10 +29,12 @@ namespace SmoothedController {
 
 		[OnStart]
 		public void OnApplicationStart() {
-			BSMLSettings.instance.AddSettingsMenu("Smooth Controller", "SmoothedController.UI.settings.bsml", PluginConfig.Instance);
-
 			harmony = new Harmony("Kinsi55.BeatSaber.SmoothedController");
 			harmony.PatchAll(Assembly.GetExecutingAssembly());
+
+			MainMenuAwaiter.MainMenuInitializing += delegate {
+				BSMLSettings.Instance.AddSettingsMenu("Smooth Controller", "SmoothedController.UI.settings.bsml", PluginConfig.Instance);
+			};
 		}
 
 		[OnExit]
