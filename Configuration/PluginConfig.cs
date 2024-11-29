@@ -23,8 +23,8 @@ namespace SmoothedController {
 		/// Call this to force BSIPA to update the config file. This is also called by BSIPA if it detects the file was modified.
 		/// </summary>
 		public virtual void Changed() {
-			Smoother.posSmoth = 20.5f - Mathf.Clamp(PositionSmoothing, 0f, 20f);
-			Smoother.rotSmoth = 20.5f - Mathf.Clamp(RotationSmoothing, 0f, 20f);
+			Smoother.posSmooth = 20f - Mathf.Clamp(PositionSmoothing, 0f, 20f);
+			Smoother.rotSmoth = 20f - Mathf.Clamp(RotationSmoothing, 0f, 20f);
 		}
 
 		/// <summary>
